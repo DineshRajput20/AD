@@ -1,0 +1,256 @@
+MAnifest
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.expt_4">
+
+    <application
+        android:allowBackup="true"
+        android:label="@string/app_name"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Expt_4">
+
+        <!-- MainActivity: launcher activity -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+
+        <!-- ShowActivity: the screen that displays the submitted data -->
+        <activity android:name=".ShowActivity" />
+
+    </application>
+
+</manifest>
+
+MAinActivity.java
+
+package com.example.expt_4;
+
+import androidx.appcompat.app.AppCompatActivity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.*;
+
+public class MainActivity extends AppCompatActivity {
+
+    EditText nameInput;
+    Spinner subjectSpinner;
+    RadioGroup genderGroup;
+    CheckBox cbUG, cbPG, cbPhD;
+    Button submitBtn;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        nameInput = findViewById(R.id.editTextName);
+        subjectSpinner = findViewById(R.id.spinnerSubject);
+        genderGroup = findViewById(R.id.radioGroupGender);
+        cbUG = findViewById(R.id.checkBoxUG);
+        cbPG = findViewById(R.id.checkBoxPG);
+        cbPhD = findViewById(R.id.checkBoxPhD);
+        submitBtn = findViewById(R.id.buttonSubmit);
+
+        // Spinner options
+        String[] subjects = {"AD", "FOC", "DM", "IE"};
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, subjects);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        subjectSpinner.setAdapter(adapter);
+
+        submitBtn.setOnClickListener(v -> {
+            String name = nameInput.getText().toString();
+            String subject = subjectSpinner.getSelectedItem().toString();
+
+            int selectedGenderId = genderGroup.getCheckedRadioButtonId();
+            RadioButton selectedGender = findViewById(selectedGenderId);
+            String gender = selectedGender != null ? selectedGender.getText().toString() : "Not selected";
+
+            StringBuilder qualification = new StringBuilder();
+            if (cbUG.isChecked()) qualification.append("UG ");
+            if (cbPG.isChecked()) qualification.append("PG ");
+            if (cbPhD.isChecked()) qualification.append("PhD ");
+
+            Intent intent = new Intent(MainActivity.this, ShowActivity.class);
+            intent.putExtra("name", name);
+            intent.putExtra("subject", subject);
+            intent.putExtra("gender", gender);
+            intent.putExtra("qualification", qualification.toString().trim());
+
+            startActivity(intent);
+        });
+    }
+}
+
+
+ShowActivity.java
+
+
+package com.example.expt_4;
+
+import androidx.appcompat.app.AppCompatActivity;
+import android.os.Bundle;
+import android.widget.TextView;
+
+public class ShowActivity extends AppCompatActivity {
+
+    TextView textViewName, textViewSubject, textViewGender, textViewQualification;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_show);
+
+        textViewName = findViewById(R.id.textViewName);
+        textViewSubject = findViewById(R.id.textViewSubject);
+        textViewGender = findViewById(R.id.textViewGender);
+        textViewQualification = findViewById(R.id.textViewQualification);
+
+        String name = getIntent().getStringExtra("name");
+        String subject = getIntent().getStringExtra("subject");
+        String gender = getIntent().getStringExtra("gender");
+        String qualification = getIntent().getStringExtra("qualification");
+
+        textViewName.setText(name);
+        textViewSubject.setText(subject);
+        textViewGender.setText(gender);
+        textViewQualification.setText(qualification);
+    }
+}
+
+
+Activity_main.xml
+
+
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:layout_height="match_parent">
+
+    <EditText
+        android:id="@+id/editTextName"
+        android:hint="Enter Name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <Spinner
+        android:id="@+id/spinnerSubject"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <RadioGroup
+        android:id="@+id/radioGroupGender"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <RadioButton android:id="@+id/radioMale" android:text="Male" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <RadioButton android:id="@+id/radioFemale" android:text="Female" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    </RadioGroup>
+
+    <CheckBox android:id="@+id/checkBoxUG" android:text="UG" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    <CheckBox android:id="@+id/checkBoxPG" android:text="PG" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    <CheckBox android:id="@+id/checkBoxPhD" android:text="PhD" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/buttonSubmit"
+        android:text="Submit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+</LinearLayout>
+
+Activity_show.xml
+
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Name -->
+    <TextView
+        android:id="@+id/labelName"
+        android:text="Name:"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/textViewName"
+        android:textSize="16sp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="8dp"/>
+
+    <!-- Subject -->
+    <TextView
+        android:id="@+id/labelSubject"
+        android:text="Subject:"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/textViewSubject"
+        android:textSize="16sp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="8dp"/>
+
+    <!-- Gender -->
+    <TextView
+        android:id="@+id/labelGender"
+        android:text="Gender:"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/textViewGender"
+        android:textSize="16sp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="8dp"/>
+
+    <!-- Qualification -->
+    <TextView
+        android:id="@+id/labelQualification"
+        android:text="Qualification:"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/textViewQualification"
+        android:textSize="16sp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+</LinearLayout>
+
+
+
+
+
+Theme.xml
+
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.RegistrationApp" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your light theme here. -->
+        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    </style>
+
+    <style name="Theme.Expt_4" parent="Base.Theme.Expt_4" />
+</resources>
